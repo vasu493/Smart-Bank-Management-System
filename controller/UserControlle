@@ -1,0 +1,47 @@
+package com.smartbanking.controller;
+
+import com.smartbanking.model.User;
+import com.smartbanking.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Optional;
+
+@RestController
+@RequestMapping("/api/users")
+public class UserController {
+    @Autowired
+    private UserRepository userRepo;
+
+    @GetMapping
+    public List<User> getAllUsers() {
+        return userRepo.findAll();
+    }
+
+    @PostMapping("/register")
+    public User register(@RequestBody User user) {
+        user.setBalance(0.0);
+        user.setRole("USER");
+        return userRepo.save(user);
+    }
+
+    @GetMapping("/{id}")
+    public Optional<User> getUser(@PathVariable Long id) {
+        return userRepo.findById(id);
+    }
+
+    @PutMapping("/transfer")
+    public String transfer(@RequestParam Long fromId, @RequestParam Long toId, @RequestParam Double amount) {
+        User from = userRepo.findById(fromId).orElse(null);
+        User to = userRepo.findById(toId).orElse(null);
+        if (from == null || to == null || from.getBalance() < amount) {
+            return "Transfer failed";
+        }
+        from.setBalance(from.getBalance() - amount);
+        to.setBalance(to.getBalance() + amount);
+        userRepo.save(from);
+        userRepo.save(to);
+        return "Transfer successful";
+    }
+}

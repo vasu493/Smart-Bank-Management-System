@@ -1,0 +1,21 @@
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+
+const Dashboard = () => {
+  const [users, setUsers] = useState([]);
+
+  useEffect(() => {
+    axios.get('http://localhost:8080/api/users').then(res => setUsers(res.data));
+  }, []);
+
+  return (
+    <div>
+      <h1>Dashboard</h1>
+      {users.map(user => (
+        <div key={user.id}>{user.username} - Balance: {user.balance}</div>
+      ))}
+    </div>
+  );
+};
+
+export default Dashboard;
